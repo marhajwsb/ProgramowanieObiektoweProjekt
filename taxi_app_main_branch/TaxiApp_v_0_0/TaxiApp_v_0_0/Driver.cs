@@ -29,6 +29,7 @@ namespace TaxiApp_v_0_0
         public bool HasOwnCar { get; set; }
         public Vehicle CurrentVehicle { get; set; }
 
+        //tutaj też warto utworzyć funkcję do pobierania danych i tworzenia nowego kierowcy na wzór klieta (patrz Client.cs od linii 24)
         public Driver(string pesel, DateTime birthDate, string firstName, string lastName, string licenseNumber,
                   DateTime licenseValidity, bool isAtWork, bool isSelfEmployed, double kilometersDriven,
                   bool isOnBreak, double dailyEarnings, double weeklyEarnings, double monthlyEarnings,
