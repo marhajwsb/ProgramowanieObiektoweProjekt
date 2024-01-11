@@ -148,6 +148,114 @@ namespace TaxiApp_v_0_0
                 }
             }
         }
+
+            // Dodawanie klienta
+    public virtual Client AddClient()
+    {
+        Console.WriteLine("Dodawanie nowego klienta:");
+        Console.Write("Imię: ");
+        string name = Console.ReadLine();
+        Console.Write("Ocena: ");
+        int rating = int.Parse(Console.ReadLine());
+        Console.Write("PESEL: ");
+        string pesel = Console.ReadLine();
+        Console.Write("Numer karty: ");
+        string cardNumber = Console.ReadLine();
+        Console.Write("Liczba podróży: ");
+        int numberOfTrips = int.Parse(Console.ReadLine());
+        Console.Write("Czy klient jest w trakcie podróży? (true/false): ");
+        bool isInTrip = bool.Parse(Console.ReadLine());
+        Console.Write("Czy klient ma zaległości finansowe? (true/false): ");
+        bool hasFinancialAreas = bool.Parse(Console.ReadLine());
+        Console.Write("Numer telefonu: ");
+        string phoneNumber = Console.ReadLine();
+
+        Client newClient = new Client(name, rating, pesel, cardNumber, numberOfTrips, isInTrip, hasFinancialAreas, phoneNumber);
+        Console.WriteLine($"Nowy klient {newClient.Name} został dodany do systemu.");
+        return newClient;
+    }
+
+    // Dodawanie kierowcy
+    public virtual Driver AddDriver()
+    {
+        Console.WriteLine("Dodawanie nowego kierowcy:");
+        Console.Write("PESEL: ");
+        string pesel = Console.ReadLine();
+        Console.Write("Data urodzenia (YYYY-MM-DD): ");
+        DateTime birthDate = DateTime.Parse(Console.ReadLine());
+        Console.Write("Imię: ");
+        string firstName = Console.ReadLine();
+        Console.Write("Nazwisko: ");
+        string lastName = Console.ReadLine();
+        Console.Write("Numer prawa jazdy: ");
+        string licenseNumber = Console.ReadLine();
+        Console.Write("Ważność prawa jazdy (YYYY-MM-DD): ");
+        DateTime licenseValidity = DateTime.Parse(Console.ReadLine());
+        Console.Write("Czy kierowca jest w pracy? (true/false): ");
+        bool isAtWork = bool.Parse(Console.ReadLine());
+        Console.Write("Czy kierowca jest samozatrudniony? (true/false): ");
+        bool isSelfEmployed = bool.Parse(Console.ReadLine());
+        Console.Write("Liczba przejechanych kilometrów: ");
+        double kilometersDriven = double.Parse(Console.ReadLine());
+        Console.Write("Czy kierowca jest na przerwie? (true/false): ");
+        bool isOnBreak = bool.Parse(Console.ReadLine());
+        Console.Write("Dzienny zarobek: ");
+        double dailyEarnings = double.Parse(Console.ReadLine());
+        Console.Write("Tygodniowy zarobek: ");
+        double weeklyEarnings = double.Parse(Console.ReadLine());
+        Console.Write("Miesięczny zarobek: ");
+        double monthlyEarnings = double.Parse(Console.ReadLine());
+        Console.Write("Roczny zarobek: ");
+        double yearlyEarnings = double.Parse(Console.ReadLine());
+        Console.Write("Numer rejestracyjny firmy: ");
+        string businessRegistrationNumber = Console.ReadLine();
+        Console.Write("Czy kierowca posiada własny pojazd? (true/false): ");
+        bool hasOwnCar = bool.Parse(Console.ReadLine());
+
+        Driver newDriver = new Driver(pesel, birthDate, firstName, lastName, licenseNumber, licenseValidity,
+            isAtWork, isSelfEmployed, kilometersDriven, isOnBreak, dailyEarnings, weeklyEarnings, monthlyEarnings,
+            yearlyEarnings, businessRegistrationNumber, hasOwnCar, null); // null, bo aktualny pojazd jeszcze nie przypisany
+
+        Console.WriteLine($"Nowy kierowca {newDriver.FirstName} {newDriver.LastName} został dodany do systemu.");
+        return newDriver;
+    }
+
+    // Dodawanie pojazdu
+    public virtual Vehicle AddVehicle(Driver driver)
+    {
+        Console.WriteLine("Dodawanie nowego pojazdu:");
+        Console.Write("VIN: ");
+        string vin = Console.ReadLine();
+        Console.Write("Rok: ");
+        int year = int.Parse(Console.ReadLine());
+        Console.Write("Marka: ");
+        string brand = Console.ReadLine();
+        Console.Write("Model: ");
+        string model = Console.ReadLine();
+        Console.Write("Cena zakupu: ");
+        double purchasePrice = double.Parse(Console.ReadLine());
+        Console.Write("Aktualna wycena: ");
+        double currentValuation = double.Parse(Console.ReadLine());
+        Console.Write("Koszty utrzymania: ");
+        double maintenanceCosts = double.Parse(Console.ReadLine());
+        Console.Write("Średnie zużycie paliwa: ");
+        double averageFuelConsumption = double.Parse(Console.ReadLine());
+        Console.Write("Przebieg: ");
+        double mileage = double.Parse(Console.ReadLine());
+        Console.Write("Pojemność: ");
+        double capacity = double.Parse(Console.ReadLine());
+        Console.Write("Numer rejestracyjny: ");
+        string registrationNumber = Console.ReadLine();
+
+        Vehicle newVehicle = new Vehicle(vin, year, brand, model, purchasePrice, currentValuation,
+            maintenanceCosts, averageFuelConsumption, mileage, capacity, driver, 0, 0, registrationNumber);
+
+        driver.AssignVehicle(newVehicle);
+
+        Console.WriteLine($"Nowy pojazd {newVehicle.Brand} {newVehicle.Model} został dodany do systemu.");
+        return newVehicle;
+    }
+}
         //***KONIEC ZARZĄDZANIA MENU***
     }
 }
