@@ -8,73 +8,143 @@ namespace TaxiApp_v_0_0
     //od CEO nikt nie będzie dziedziczył
     public abstract class ManagementObject
     {
-        //**ZARZĄDZANIE KURSAMI***
-        //ta funkcja jest pierwotnie void, ale ostatecznie powinna zwracać dane typu int/string
-        //z koordynantami dla podanego adresu
-        public virtual List<string> getAddress(string direction, string[] addressProperties)
+        //protected hermetyzacja
+        protected static List<Driver> drivers = new List<Driver>();
+
+        //**ZARZĄDZANIE KIEROWCAMI***
+        public void AddDriver()
         {
-            Console.Clear();
-            char ifContinue;
-            List<string> completeAddress = new List<string>();
-            string inputValue = "";
+            string[] driverProperties = { "imie", "nazwisko" };
+            List<string> driverParams = getMultipleData(driverProperties);
+            
+            Console.WriteLine(driverParams[0]);
 
-            while (true)
+            Driver newDriver = new Driver(driverParams[0], driverParams[1]);
+            drivers.Add(newDriver);
+            Console.WriteLine(newDriver._name);
+            Console.WriteLine(newDriver._surname);
+            Console.WriteLine(newDriver._driverId);
+        }
+
+        public void RemoveDriver()
+        {
+            string[] driverId = { "id kierowcy" };
+            List<string> driverParam = getMultipleData(driverId);
+            int driverIdToFind;
+            bool ifDeleted = false;
+            bool isValidNumber = int.TryParse(driverParam[0], out driverIdToFind);
+
+            if (isValidNumber)
             {
-                foreach (string val in addressProperties)
+                var driver = drivers.FirstOrDefault(d => d._driverId == driverIdToFind);
+                if (driver != null)
                 {
-                    while (true)
-                    {
-                        Console.WriteLine("Podaj {0} {1}", direction, val);
-                        inputValue = Console.ReadLine();
-
-                        if (!string.IsNullOrEmpty(inputValue))
-                        {
-                            completeAddress.Add(inputValue);
-                            break;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Wprowadzono pusty znak. Sprobuj ponownie.");
-                        }
-                    }
+                    drivers.Remove(driver);
+                    ifDeleted = true; // Zwraca true, jeśli kierowca został usunięty.
                 }
-
-                Console.WriteLine("Czy adres \n'{0}" +
-                    "\n{1}" +
-                    "\n{2}'\n" +
-                    "jest poprawny? Type [y/n]", completeAddress[0], completeAddress[1], completeAddress[2]);
-
-                do
-                {
-                    ifContinue = Console.ReadKey().KeyChar;
-                    if (ifContinue == 'y')
-                    {
-                        return completeAddress;
-                    }
-                    else if (ifContinue == 'n')
-                    {
-                        completeAddress.Clear();
-                        Console.WriteLine("\nWprowadź ponownie dane.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("\nWprowadź 'y' w celu zatwierdzenia, 'n' w celu ponownego wprowadzenia danych" +
-                            "Czy na pewno wprowadziłeś poprawną opcję?");
-                    }
-                } while (ifContinue != 'y' && ifContinue != 'n');
+            }
+            
+            if (ifDeleted)
+            {
+                Console.WriteLine("Kierowca usunięty.");
+            } else
+            {
+                Console.WriteLine("Kierowca o podanym id {0} nie znaleziony.", driverParam[0]);
             }
         }
 
+        public void FindDriver()
+        {
+            string[] driverProperties = { "imie", "nazwisko" };
+            List<string> searchParams = getMultipleData(driverProperties);
+            bool found = false;
+            foreach (var driver in drivers)
+            {
+                if (driver._name == searchParams[0] && driver._surname == searchParams[1])
+                {
+                    Console.WriteLine($"ID: {driver._driverId} Imię: {driver._name} Nazwisko: {driver._surname} Zarobki: {driver._earnings}");
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                Console.WriteLine("Nie znaleziono kierowcy.");
+            }
+        }
+
+        public static void ListAllDrivers()
+        {
+            if (drivers.Count == 0)
+            {
+                Console.WriteLine("Brak kierowców na liście.");
+                return;
+            }
+
+            Console.WriteLine("Lista kierowców:");
+            foreach (var driver in drivers)
+            {
+                Console.WriteLine($"ID: {driver._driverId} Imię: {driver._name} Nazwisko: {driver._surname} Zarobki: {driver._earnings}");
+            }
+        }
+        //**KONIEC ZARZĄDZANIA KIEROWCAMI***
+
+        //KURS
+        protected decimal RatePerKm = 2.5m; // Przykładowa wartość
+        protected decimal commissionRate = 0.1m;
+
+        public async Task AssignRouteToDriver()                         //moze zmienic nazwe na realizeCourse?
+        {
+            // Pobieranie ID kierowcy
+            Console.WriteLine("Podaj ID kierowcy:");
+            int driverId = int.Parse(Console.ReadLine());
+
+            // Znajdowanie kierowcy
+            var driver = drivers.FirstOrDefault(d => d._driverId == driverId);
+            if (driver == null)
+            {
+                Console.WriteLine("Nie znaleziono kierowcy o podanym ID.");
+                return;
+            }
+
+            List<string> routeDetails = await calculateRoute();
+
+            foreach (string element in routeDetails)
+            {
+                Console.WriteLine(element);
+            }
+
+            if (routeDetails.Count > 0)
+            {
+                decimal distance = decimal.Parse(routeDetails[2]) / 1000;
+                driver.UpdateEarningsAndReturnCommison(distance, RatePerKm, commissionRate);
+            }
+            else
+            {
+                Console.WriteLine("Nie udało się obliczyć kursu.");
+            }
+        }
+
+        protected static decimal budget = 0;
+
+        public static void takeCommision(decimal commision)
+        {
+            Console.WriteLine("wzinto prowizje");
+            budget += commision;
+            Console.WriteLine(budget);
+        }
+        //KURS
+        //**ZARZĄDZANIE KURSAMI***
         public virtual async Task<List<string>> calculateRoute()
         {
-            string[] direction = { "początkową/-y", "docelową/-y" };
-            string[] addressProperties = { "miejscowość", "ulicę", "numer budynku" };
+            string[] startAddressProperties = { "początkową miejscowość", "początkową ulicę", "początkowy numer budynku" };
+            string[] endAddressProperties = { "końcową miejscowość", "końcową ulicę", "końcowy numer budynku" };
 
             //Klucz API do wrzucenia do oddzielnego pliku                                             !!!!TO-DO!!!!!
             var apiKey = "AIzaSyCSoBDJXMCbiCBYFIzAfT3sa_HciPuCouE";
 
-            List<string> completeOriginAddress = getAddress(direction[0], addressProperties);
-            List<string> completeDestinationAddress = getAddress(direction[1], addressProperties);
+            List<string> completeOriginAddress = getMultipleData(startAddressProperties);
+            List<string> completeDestinationAddress = getMultipleData(endAddressProperties);
             List<string> jsonResponse = new List<string>();
 
             var queryURL = $"https://maps.googleapis.com/maps/api/distancematrix/json?origins={completeOriginAddress[0]},{completeOriginAddress[1]},{completeOriginAddress[2]}&destinations={completeDestinationAddress[0]},{completeDestinationAddress[1]},{completeDestinationAddress[2]}&key={apiKey}";
@@ -112,150 +182,65 @@ namespace TaxiApp_v_0_0
             return new List<string>();
         }
         //***KONIEC ZARZĄDZANIA KURSAMI***
-        //***ZARZĄDZNIE MENU***
-        public virtual void showOptions()
+        //pobieranie danych
+        public virtual List<string> getMultipleData(string[] addressProperties)
         {
-            Console.WriteLine("Wybierz interesującą Ciebie opcję:" +
-                "\na - dodaj kurs");
+            char ifContinue;
+            List<string> completeAddress = new List<string>();
+            string inputValue = "";
+
+            while (true)
+            {
+                Console.Clear();
+                foreach (string val in addressProperties)
+                {
+                    while (true)
+                    {
+                        Console.WriteLine("Podaj {0}", val);
+                        inputValue = Console.ReadLine();
+
+                        if (!string.IsNullOrEmpty(inputValue))
+                        {
+                            completeAddress.Add(inputValue);
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Wprowadzono pusty znak. Sprobuj ponownie.");
+                        }
+                    }
+                }
+                Console.Clear();
+                Console.WriteLine("Czy poniższe dane są poprawne?");
+                foreach (string address in completeAddress)
+                {
+                    Console.WriteLine(address);
+                }
+                Console.WriteLine("Wprowadz 'y' aby zatwierdzić dane lub wprowadź 'n' aby ponownie podać dane.");
+                do
+                {
+                    ifContinue = Console.ReadKey().KeyChar;
+                    if (ifContinue == 'y')
+                    {
+                        return completeAddress;
+                    }
+                    else if (ifContinue == 'n')
+                    {
+                        completeAddress.Clear();
+                        Console.WriteLine("\nWprowadź ponownie dane.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nWprowadź 'y' w celu zatwierdzenia, 'n' w celu ponownego wprowadzenia danych" +
+                            "Czy na pewno wprowadziłeś poprawną opcję?");
+                    }
+                } while (ifContinue != 'y' && ifContinue != 'n');
+            }
         }
 
         public virtual async Task chooseOption()
         {
-            //do zaimplementowania wykonywanie konkretnej opcji
-            bool loop = true;
-            while (loop)
-            {
-                showOptions();
-                char choosenOption = Console.ReadKey().KeyChar;
-                //Kolejne opcje dla centrali i ceo do dorzucenia tutaj
-                switch (choosenOption)
-                {
-                    case 'a':
-                        List<string> calculatedRoute = new List<string>();
-                        calculatedRoute = await calculateRoute();
-                        Console.WriteLine("Co zwraca calculateRoute?\nAdres docelowy: {0}" +
-                            "\nAdres początkowy: {1}" +
-                            "\nOdległość w metrach: {2}" +
-                            "\nCzas w minutach: {3}", calculatedRoute[0], calculatedRoute[1], calculatedRoute[2], calculatedRoute[3]);
-                        break;
-                    case 'x':
-                        Console.WriteLine("Kończę działanie, dobranoc...");
-                        loop = false;
-                        break;
-                    default:
-                        Console.WriteLine("Wybrales opcję, której nie ma. Dokonaj wyboru ponownie, aby zakończyć wprowadź 'x'");
-                        break;
-                }
-            }
+
         }
-
-            // Dodawanie klienta
-    public virtual Client AddClient()
-    {
-        Console.WriteLine("Dodawanie nowego klienta:");
-        Console.Write("Imię: ");
-        string name = Console.ReadLine();
-        Console.Write("Ocena: ");
-        int rating = int.Parse(Console.ReadLine());
-        Console.Write("PESEL: ");
-        string pesel = Console.ReadLine();
-        Console.Write("Numer karty: ");
-        string cardNumber = Console.ReadLine();
-        Console.Write("Liczba podróży: ");
-        int numberOfTrips = int.Parse(Console.ReadLine());
-        Console.Write("Czy klient jest w trakcie podróży? (true/false): ");
-        bool isInTrip = bool.Parse(Console.ReadLine());
-        Console.Write("Czy klient ma zaległości finansowe? (true/false): ");
-        bool hasFinancialAreas = bool.Parse(Console.ReadLine());
-        Console.Write("Numer telefonu: ");
-        string phoneNumber = Console.ReadLine();
-
-        Client newClient = new Client(name, rating, pesel, cardNumber, numberOfTrips, isInTrip, hasFinancialAreas, phoneNumber);
-        Console.WriteLine($"Nowy klient {newClient.Name} został dodany do systemu.");
-        return newClient;
-    }
-
-    // Dodawanie kierowcy
-    public virtual Driver AddDriver()
-    {
-        Console.WriteLine("Dodawanie nowego kierowcy:");
-        Console.Write("PESEL: ");
-        string pesel = Console.ReadLine();
-        Console.Write("Data urodzenia (YYYY-MM-DD): ");
-        DateTime birthDate = DateTime.Parse(Console.ReadLine());
-        Console.Write("Imię: ");
-        string firstName = Console.ReadLine();
-        Console.Write("Nazwisko: ");
-        string lastName = Console.ReadLine();
-        Console.Write("Numer prawa jazdy: ");
-        string licenseNumber = Console.ReadLine();
-        Console.Write("Ważność prawa jazdy (YYYY-MM-DD): ");
-        DateTime licenseValidity = DateTime.Parse(Console.ReadLine());
-        Console.Write("Czy kierowca jest w pracy? (true/false): ");
-        bool isAtWork = bool.Parse(Console.ReadLine());
-        Console.Write("Czy kierowca jest samozatrudniony? (true/false): ");
-        bool isSelfEmployed = bool.Parse(Console.ReadLine());
-        Console.Write("Liczba przejechanych kilometrów: ");
-        double kilometersDriven = double.Parse(Console.ReadLine());
-        Console.Write("Czy kierowca jest na przerwie? (true/false): ");
-        bool isOnBreak = bool.Parse(Console.ReadLine());
-        Console.Write("Dzienny zarobek: ");
-        double dailyEarnings = double.Parse(Console.ReadLine());
-        Console.Write("Tygodniowy zarobek: ");
-        double weeklyEarnings = double.Parse(Console.ReadLine());
-        Console.Write("Miesięczny zarobek: ");
-        double monthlyEarnings = double.Parse(Console.ReadLine());
-        Console.Write("Roczny zarobek: ");
-        double yearlyEarnings = double.Parse(Console.ReadLine());
-        Console.Write("Numer rejestracyjny firmy: ");
-        string businessRegistrationNumber = Console.ReadLine();
-        Console.Write("Czy kierowca posiada własny pojazd? (true/false): ");
-        bool hasOwnCar = bool.Parse(Console.ReadLine());
-
-        Driver newDriver = new Driver(pesel, birthDate, firstName, lastName, licenseNumber, licenseValidity,
-            isAtWork, isSelfEmployed, kilometersDriven, isOnBreak, dailyEarnings, weeklyEarnings, monthlyEarnings,
-            yearlyEarnings, businessRegistrationNumber, hasOwnCar, null); // null, bo aktualny pojazd jeszcze nie przypisany
-
-        Console.WriteLine($"Nowy kierowca {newDriver.FirstName} {newDriver.LastName} został dodany do systemu.");
-        return newDriver;
-    }
-
-    // Dodawanie pojazdu
-    public virtual Vehicle AddVehicle(Driver driver)
-    {
-        Console.WriteLine("Dodawanie nowego pojazdu:");
-        Console.Write("VIN: ");
-        string vin = Console.ReadLine();
-        Console.Write("Rok: ");
-        int year = int.Parse(Console.ReadLine());
-        Console.Write("Marka: ");
-        string brand = Console.ReadLine();
-        Console.Write("Model: ");
-        string model = Console.ReadLine();
-        Console.Write("Cena zakupu: ");
-        double purchasePrice = double.Parse(Console.ReadLine());
-        Console.Write("Aktualna wycena: ");
-        double currentValuation = double.Parse(Console.ReadLine());
-        Console.Write("Koszty utrzymania: ");
-        double maintenanceCosts = double.Parse(Console.ReadLine());
-        Console.Write("Średnie zużycie paliwa: ");
-        double averageFuelConsumption = double.Parse(Console.ReadLine());
-        Console.Write("Przebieg: ");
-        double mileage = double.Parse(Console.ReadLine());
-        Console.Write("Pojemność: ");
-        double capacity = double.Parse(Console.ReadLine());
-        Console.Write("Numer rejestracyjny: ");
-        string registrationNumber = Console.ReadLine();
-
-        Vehicle newVehicle = new Vehicle(vin, year, brand, model, purchasePrice, currentValuation,
-            maintenanceCosts, averageFuelConsumption, mileage, capacity, driver, 0, 0, registrationNumber);
-
-        driver.AssignVehicle(newVehicle);
-
-        Console.WriteLine($"Nowy pojazd {newVehicle.Brand} {newVehicle.Model} został dodany do systemu.");
-        return newVehicle;
-    }
-}
-        //***KONIEC ZARZĄDZANIA MENU***
     }
 }

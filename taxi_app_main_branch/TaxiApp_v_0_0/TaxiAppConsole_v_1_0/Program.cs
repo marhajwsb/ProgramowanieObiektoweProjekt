@@ -6,9 +6,8 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        Central obiekt = new Central();
+        CEO obiekt = new CEO();
         await obiekt.chooseOption();
-
         Console.ReadLine();
     }
 }
