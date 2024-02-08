@@ -1,6 +1,6 @@
 ﻿namespace TaxiApp_v_0_0
 {
-    public sealed class CEO : Central
+    public sealed class CEO : Central, IDriverManager
     {
         public void showOptions()
         {
