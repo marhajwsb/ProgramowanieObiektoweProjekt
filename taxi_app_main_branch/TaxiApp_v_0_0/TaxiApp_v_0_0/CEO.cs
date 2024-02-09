@@ -9,15 +9,14 @@
                 "\nb - dodaj kierowce" +
                 "\nc - znajdz kierowce" +
                 "\nd - wyswietl wszystkich kierowcow" +
-                "\ne - usunac kierowce" +
-                "\nf - zmienic stawke kilometrowa" +
-                "\ng - zmienic prowizje");
+                "\ne - usun kierowce" +
+                "\nf - zmiana stawki kilometrowej" +
+                "\ng - zmiana prowizji");
         }
 
         public override async Task chooseOption()
         {
             showOptions();
-            //do zaimplementowania wykonywanie konkretnej opcji
             bool loop = true;
             while (loop)
             {
@@ -28,7 +27,6 @@
                     Console.WriteLine(choosenOption); 
                 } while (char.IsWhiteSpace(choosenOption));
 
-                //Kolejne opcje dla centrali i ceo do dorzucenia tutaj
                 switch (choosenOption)
                 {
                     case 'a':
@@ -75,8 +73,6 @@
                         showOptions();
                         break;
                 }
-                
-
             }
         }
 

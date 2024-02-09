@@ -5,26 +5,33 @@ using System.Threading;
 
 namespace TaxiApp_v_0_0
 {
-    //jak od tej klasy będziemy tworzyć CEO to warto pamiętać, żeby był klasą sealed (zamkniętą)
-    //od CEO nikt nie będzie dziedziczył
     public abstract class ManagementObject
     {
-        //protected hermetyzacja
         protected static List<Driver> drivers = new List<Driver>();
 
-        //**ZARZĄDZANIE KIEROWCAMI***
         public void AddDriver()
         {
-            string[] driverProperties = { "imie", "nazwisko" };
-            List<string> driverParams = getMultipleData(driverProperties);
-            
-            Console.WriteLine(driverParams[0]);
+            string[] driverProperties = { "imie", "nazwisko", "PESEL" };
 
-            Driver newDriver = new Driver(driverParams[0], driverParams[1]);
-            drivers.Add(newDriver);
-            Console.WriteLine(newDriver._name);
-            Console.WriteLine(newDriver._surname);
-            Console.WriteLine(newDriver._driverId);
+            bool areDataCorrect = false;
+            while (!areDataCorrect)
+            {
+                List<string> driverParams = getMultipleData(driverProperties);
+                try
+                {
+                    Driver newDriver = new Driver(driverParams[0], driverParams[1], driverParams[2]);
+                    areDataCorrect = true; 
+                    drivers.Add(newDriver);
+                    Console.WriteLine(newDriver._name);
+                    Console.WriteLine(newDriver._surname);
+                    Console.WriteLine(newDriver._driverId);
+                    Console.WriteLine(newDriver._driverId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
 
         public void RemoveDriver()
@@ -54,7 +61,7 @@ namespace TaxiApp_v_0_0
             }
         }
 
-        public void FindDriver()
+        public void findByName()
         {
             string[] driverProperties = { "imie", "nazwisko" };
             List<string> searchParams = getMultipleData(driverProperties);
@@ -63,15 +70,93 @@ namespace TaxiApp_v_0_0
             {
                 if (driver._name == searchParams[0] && driver._surname == searchParams[1])
                 {
-                    Console.WriteLine($"ID: {driver._driverId} Imię: {driver._name} Nazwisko: {driver._surname} Zarobki: {driver._earnings}");
+                    Console.WriteLine($"\nID: {driver._driverId}\nImię: {driver._name}\nNazwisko: {driver._surname}\nPESEL: {driver._PESEL}\nZarobki: {driver._earnings}\n---");
                     found = true;
                 }
             }
-
             if (!found)
             {
                 Console.WriteLine("Nie znaleziono kierowcy.");
             }
+        }
+
+        public void findByPesel()
+        {
+            string[] driverProperties = { "PESEL" };
+            List<string> searchParams = null;
+            long PESEL = 0;
+            bool areDataCorrect = false;
+            while (!areDataCorrect)
+            {
+                searchParams = getMultipleData(driverProperties);
+                try
+                {
+                    if (long.TryParse(searchParams[0], out long longPESEL))
+                    {
+                        PESEL = longPESEL;
+                        areDataCorrect = true;
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("\nWprowadzony PESEL jest niepoprawny. Zweryfikuj wprowadzone dane i spróbuj ponownie.");
+                }
+            }
+
+            bool found = false;
+            foreach (var driver in drivers)
+            {
+                if (driver._PESEL == PESEL)
+                {
+                    Console.WriteLine($"\nID: {driver._driverId}\nImię: {driver._name}\nNazwisko: {driver._surname}\nPESEL: {driver._PESEL}\nZarobki: {driver._earnings}\n---");
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                Console.WriteLine("Nie znaleziono kierowcy.");
+            }
+        }
+
+        public void FindDriver()
+        {
+            Console.Clear();
+
+            bool loop = true;
+            while (loop)
+            {
+                Console.WriteLine("Wybierz interesującą Ciebie opcję:" +
+                "\na - wyszukiwanie wg imienia i nazwiska" +
+                "\nb - wyszukiwanie wg numeru PESEL" +
+                "\nx - aby wyjść");
+                char choosenOption;
+                do
+                {
+                    choosenOption = Console.ReadKey(true).KeyChar;
+                    Console.WriteLine(choosenOption);
+                } while (char.IsWhiteSpace(choosenOption));
+                switch (choosenOption)
+                {
+                    case 'a':
+                        findByName();
+                        break;
+                    case 'b':
+                        findByPesel();
+                        break;
+                    case 'x':
+                        loop = false;
+                        break;
+                    default:
+                        Console.WriteLine(choosenOption);
+                        Console.WriteLine("Wybrales opcję, której nie ma. Dokonaj wyboru ponownie, aby zakończyć wprowadź 'x'");
+                        break;
+                }
+            }
+            
         }
 
         public static void ListAllDrivers()
@@ -88,19 +173,15 @@ namespace TaxiApp_v_0_0
                 Console.WriteLine($"ID: {driver._driverId} Imię: {driver._name} Nazwisko: {driver._surname} Zarobki: {driver._earnings}");
             }
         }
-        //**KONIEC ZARZĄDZANIA KIEROWCAMI***
 
-        //KURS
         protected decimal RatePerKm = 2.5m;
         protected decimal commissionRate = 0.1m;
 
-        public async Task AssignRouteToDriver()                         //moze zmienic nazwe na realizeCourse?
+        public async Task AssignRouteToDriver()
         {
-            // Pobieranie ID kierowcy
             Console.WriteLine("Podaj ID kierowcy:");
             int driverId = int.Parse(Console.ReadLine());
 
-            // Znajdowanie kierowcy
             var driver = drivers.FirstOrDefault(d => d._driverId == driverId);
 
             if (driver == null)
@@ -113,11 +194,6 @@ namespace TaxiApp_v_0_0
             driverParameters.Add($"{driver._surname}");
 
             List<string> routeDetails = await calculateRoute();
-
-            /*            foreach (string element in routeDetails)
-                        {
-                            Console.WriteLine(element);
-                        }*/
 
             if (routeDetails.Count > 0)
             {
@@ -140,15 +216,13 @@ namespace TaxiApp_v_0_0
                 $"Prowizja w kwocie {commision} doliczona do budżetu.\n" +
                 $"Aktualny stan budżetu firmy: {budget}");
         }
-        //KURS
-        //**ZARZĄDZANIE KURSAMI***
+
         public virtual async Task<List<string>> calculateRoute()
         {
             string[] startAddressProperties = { "początkową miejscowość", "początkową ulicę", "początkowy numer budynku" };
             string[] endAddressProperties = { "końcową miejscowość", "końcową ulicę", "końcowy numer budynku" };
 
-            //Klucz API do wrzucenia do oddzielnego pliku                                             !!!!TO-DO!!!!!
-            var apiKey = "AIzaSyCSoBDJXMCbiCBYFIzAfT3sa_HciPuCouE";
+            string apiKey = "AIzaSyCSoBDJXMCbiCBYFIzAfT3sa_HciPuCouE";
 
             List<string> completeOriginAddress = getMultipleData(startAddressProperties);
             List<string> completeDestinationAddress = getMultipleData(endAddressProperties);
@@ -158,10 +232,9 @@ namespace TaxiApp_v_0_0
 
             using (var client = new HttpClient())
             {
-                //Zapytanie odbywa się asynchroncznie; w przypadku rozbudowy aplikacji
-                //albo dodania interfejsu graficznego warto przerobić na asynchroniczne przetwarzanie zapytań
+
                 HttpResponseMessage response = await client.GetAsync(queryURL);
-                //dobrze dodać try ... catch do wyłapania i obsługi ewentualnych błędów
+
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
@@ -189,8 +262,7 @@ namespace TaxiApp_v_0_0
 
             return new List<string>();
         }
-        //***KONIEC ZARZĄDZANIA KURSAMI***
-        //pobieranie danych
+
         public virtual List<string> getMultipleData(string[] addressProperties)
         {
             char ifContinue;
@@ -199,7 +271,6 @@ namespace TaxiApp_v_0_0
 
             while (true)
             {
-                Console.Clear();
                 foreach (string val in addressProperties)
                 {
                     while (true)

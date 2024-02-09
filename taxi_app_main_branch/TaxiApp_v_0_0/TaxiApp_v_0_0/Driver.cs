@@ -6,14 +6,24 @@
         private int driverId;
         private string name;
         private string surname;
+        private long PESEL;
         private decimal earnings;
 
-        public Driver(string name, string surname)
+        public Driver(string name, string surname, string PESEL)
         {
             primaryKey += 1;
             driverId = primaryKey;
             this.name = name;
             this.surname = surname;
+            Console.WriteLine(PESEL);
+            if (long.TryParse(PESEL, out long longPESEL))
+            {
+                this.PESEL = longPESEL;
+            }
+            else
+            {
+                throw new ArgumentException("Podane dane nie są poprawne. Sprawdź dane i spróbuj ponownie...");
+            }
             earnings = 0;
         }
 
@@ -24,10 +34,11 @@
             earnings = (distance * ratePerKm) - commision;
         }
 
-/*        public decimal GetEarnings()
+        public long _PESEL
         {
-            return earnings;
-        }*/
+            get { return PESEL; }
+            set { PESEL = value; }
+        }
 
         public decimal _earnings
         {
