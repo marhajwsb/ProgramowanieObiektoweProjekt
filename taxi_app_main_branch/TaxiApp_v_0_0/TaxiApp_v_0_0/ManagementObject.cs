@@ -170,7 +170,7 @@ namespace TaxiApp_v_0_0
             Console.WriteLine("Lista kierowców:");
             foreach (var driver in drivers)
             {
-                Console.WriteLine($"ID: {driver._driverId} Imię: {driver._name} Nazwisko: {driver._surname} Zarobki: {driver._earnings}");
+                Console.WriteLine($"\nID: {driver._driverId}\nImię: {driver._name}\nNazwisko: {driver._surname}\nPESEL: {driver._PESEL}\nZarobki: {driver._earnings}\n---");
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-
 using TaxiApp_v_0_0;
 
 class Program
