@@ -61,7 +61,7 @@ namespace TaxiApp_v_0_0
             }
         }
 
-        public void findByName()
+        private void findByName()
         {
             string[] driverProperties = { "imie", "nazwisko" };
             List<string> searchParams = getMultipleData(driverProperties);
@@ -80,7 +80,7 @@ namespace TaxiApp_v_0_0
             }
         }
 
-        public void findByPesel()
+        private void findByPesel()
         {
             string[] driverProperties = { "PESEL" };
             List<string> searchParams = null;
