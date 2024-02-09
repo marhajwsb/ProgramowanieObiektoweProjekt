@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Threading;
 
 namespace TaxiApp_v_0_0
 {
@@ -40,7 +41,7 @@ namespace TaxiApp_v_0_0
                 if (driver != null)
                 {
                     drivers.Remove(driver);
-                    ifDeleted = true; // Zwraca true, jeśli kierowca został usunięty.
+                    ifDeleted = true;
                 }
             }
             
@@ -90,7 +91,7 @@ namespace TaxiApp_v_0_0
         //**KONIEC ZARZĄDZANIA KIEROWCAMI***
 
         //KURS
-        protected decimal RatePerKm = 2.5m; // Przykładowa wartość
+        protected decimal RatePerKm = 2.5m;
         protected decimal commissionRate = 0.1m;
 
         public async Task AssignRouteToDriver()                         //moze zmienic nazwe na realizeCourse?
@@ -101,37 +102,43 @@ namespace TaxiApp_v_0_0
 
             // Znajdowanie kierowcy
             var driver = drivers.FirstOrDefault(d => d._driverId == driverId);
+
             if (driver == null)
             {
                 Console.WriteLine("Nie znaleziono kierowcy o podanym ID.");
                 return;
-            }
+            } 
+            List<string> driverParameters = new List<string>();
+            driverParameters.Add($"{driver._name}");
+            driverParameters.Add($"{driver._surname}");
 
             List<string> routeDetails = await calculateRoute();
 
-            foreach (string element in routeDetails)
-            {
-                Console.WriteLine(element);
-            }
+            /*            foreach (string element in routeDetails)
+                        {
+                            Console.WriteLine(element);
+                        }*/
 
             if (routeDetails.Count > 0)
             {
                 decimal distance = decimal.Parse(routeDetails[2]) / 1000;
-                driver.UpdateEarningsAndReturnCommison(distance, RatePerKm, commissionRate);
+                driver.UpdateEarningsAndReturnCommison(routeDetails[0], routeDetails[1], distance, RatePerKm, commissionRate, driverParameters);
             }
             else
             {
-                Console.WriteLine("Nie udało się obliczyć kursu.");
+                Console.WriteLine("Wystąpił problem z przeliczeniem kursu.");
             }
         }
 
         protected static decimal budget = 0;
 
-        public static void takeCommision(decimal commision)
+        public static void takeCommision(string end, string start, decimal commision, List<string> driverParameters)
         {
-            Console.WriteLine("wzinto prowizje");
             budget += commision;
-            Console.WriteLine(budget);
+            Console.WriteLine($"\nZrealizowano kurs z {start} do {end}.\n" +
+                $"Kurs zrealizowany przez kierowcę {driverParameters[0]} {driverParameters[1]}.\n" +
+                $"Prowizja w kwocie {commision} doliczona do budżetu.\n" +
+                $"Aktualny stan budżetu firmy: {budget}");
         }
         //KURS
         //**ZARZĄDZANIE KURSAMI***
@@ -179,6 +186,7 @@ namespace TaxiApp_v_0_0
                     Console.WriteLine("Nie udało się uzyskać odpowiedzi.");
                 }
             }
+
             return new List<string>();
         }
         //***KONIEC ZARZĄDZANIA KURSAMI***

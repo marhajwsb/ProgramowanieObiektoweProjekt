@@ -17,11 +17,10 @@
             earnings = 0;
         }
 
-        public void UpdateEarningsAndReturnCommison(decimal distance, decimal ratePerKm, decimal commisionRate)
+        public void UpdateEarningsAndReturnCommison(string end, string start, decimal distance, decimal ratePerKm, decimal commisionRate, List<string> driverParams)
         {
-            Console.WriteLine("commision rate: {0}", ratePerKm);
             decimal commision = (distance * ratePerKm) * commisionRate;
-            ManagementObject.takeCommision(commision);
+            ManagementObject.takeCommision(end, start, commision, driverParams);
             earnings = (distance * ratePerKm) - commision;
         }
 

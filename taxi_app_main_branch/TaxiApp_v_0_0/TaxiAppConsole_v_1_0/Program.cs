@@ -6,7 +6,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        CEO obiekt = new CEO();
+        ManagementObject obiekt = new CEO();
         await obiekt.chooseOption();
         Console.ReadLine();
     }

@@ -16,17 +16,16 @@
 
         public override async Task chooseOption()
         {
+            showOptions();
             //do zaimplementowania wykonywanie konkretnej opcji
             bool loop = true;
             while (loop)
             {
-                showOptions();
-
                 char choosenOption;
                 do
                 {
-                    choosenOption = Console.ReadKey(true).KeyChar; // Odczytaj znak bez wyświetlania go
-                    Console.WriteLine(choosenOption); // Wyświetl odczytany znak
+                    choosenOption = Console.ReadKey(true).KeyChar; 
+                    Console.WriteLine(choosenOption); 
                 } while (char.IsWhiteSpace(choosenOption));
 
                 //Kolejne opcje dla centrali i ceo do dorzucenia tutaj
@@ -35,28 +34,36 @@
                     case 'a':
                         List<string> calculatedRoute = new List<string>();
                         AssignRouteToDriver();
+                        Thread.Sleep(1000);
+                        showOptions();
                         break;
                     case 'b':
                         AddDriver();
+                        showOptions();
                         break;
                     case 'c':
                         FindDriver();
+                        showOptions();
                         break;
                     case 'd':
                         ListAllDrivers();
+                        showOptions();
                         break;
                     case 'e':
                         RemoveDriver();
+                        showOptions();
                         break;
                     case 'f':
                         Console.WriteLine($"Obecna stawka kilometrowa wartość wynosi {RatePerKm}.\nWprowadz nową stawkę albo wpisz q aby przerwać.");
                         RatePerKm = updateRate(RatePerKm);
                         Console.WriteLine($"Aktualna wartość wynosi {RatePerKm}");
+                        showOptions();
                         break;
                     case 'g':
                         Console.WriteLine($"Obecna wartość wynosi {commissionRate}\nWprowadz nową wartość prowizji w formacie dziesiętnym.\nAby przerwac wprowadz q.");
                         commissionRate = updateRate(commissionRate);
                         Console.WriteLine($"Aktualna wartość wynosi {commissionRate}");
+                        showOptions();
                         break;
                     case 'x':
                         Console.WriteLine("Kończę działanie, dobranoc...");
@@ -65,6 +72,7 @@
                     default:
                         Console.WriteLine(choosenOption);
                         Console.WriteLine("Wybrales opcję, której nie ma. Dokonaj wyboru ponownie, aby zakończyć wprowadź 'x'");
+                        showOptions();
                         break;
                 }
                 
